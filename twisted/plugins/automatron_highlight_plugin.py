@@ -83,7 +83,7 @@ class HighlightPlugin(object):
                         cgi.escape(message[start:end]) + \
                         '</font>'
                 last = end
-            message_html += message[last:]
+            message_html += cgi.escape(message[last:])
 
             self.controller.plugins.emit(
                 IAutomatronNotifyHandler['on_notify'],
