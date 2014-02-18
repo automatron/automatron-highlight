@@ -30,6 +30,8 @@ class HighlightPlugin(object):
         config = yield self.controller.config.get_plugin_section(self, client.server, channel)
         events = {}
 
+        own_username, _ = yield self.controller.config.get_username_by_hostmask(client.server, user)
+
         for highlight, highlight_usernames in config.items():
             highlight_usernames = json.loads(highlight_usernames)
 
@@ -55,6 +57,9 @@ class HighlightPlugin(object):
                 continue
 
             for username in highlight_usernames:
+                if username == own_username:
+                    continue
+
                 if not username in events:
                     events[username] = []
                 events[username].extend(matches)
