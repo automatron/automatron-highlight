@@ -23,7 +23,7 @@ class HighlightPlugin(object):
     def on_message(self, client, user, channel, message):
         if not message:
             return
-        return self._on_message(client, user, channel, message)
+        self._on_message(client, user, channel, message)
 
     @defer.inlineCallbacks
     def _on_message(self, client, user, channel, message):
@@ -33,8 +33,6 @@ class HighlightPlugin(object):
         own_username, _ = yield self.controller.config.get_username_by_hostmask(client.server, user)
 
         for highlight, highlight_usernames in config.items():
-            highlight_usernames = json.loads(highlight_usernames)
-
             matches = []
             last = 0
             if highlight.startswith('~'):
@@ -55,6 +53,8 @@ class HighlightPlugin(object):
 
             if not matches:
                 continue
+
+            highlight_usernames = [u.encode('utf-8') for u in json.loads(highlight_usernames)]
 
             for username in highlight_usernames:
                 if username == own_username:
