@@ -1,5 +1,8 @@
 import cgi
-import json
+try:
+    import ujson as json
+except ImportError:
+    import json
 import datetime
 from twisted.internet import defer
 from zope.interface import implements, classProvides
