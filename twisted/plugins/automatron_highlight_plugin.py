@@ -110,18 +110,16 @@ class HighlightPlugin(object):
 
     @defer.inlineCallbacks
     def _on_command(self, client, user, args):
-        nickname = client.parse_user(user)[0]
-
         if len(args) != 2:
-            yield client.msg(nickname, 'Syntax: highlight <channel> <highlight>')
-            yield client.msg(nickname, 'If highlight starts with a ~ it will be interpreted as a regular '
-                                       'expression.')
+            yield client.msg(user, 'Syntax: highlight <channel> <highlight>')
+            yield client.msg(user, 'If highlight starts with a ~ it will be interpreted as a regular '
+                                   'expression.')
             defer.returnValue(STOP)
 
         channel, highlight = args
 
         if not (yield self.controller.config.has_permission(client.server, channel, user, 'highlight')):
-            client.msg(nickname, 'You\'re not authorized to set up highlights.')
+            client.msg(user, 'You\'re not authorized to set up highlights.')
             defer.returnValue(STOP)
 
         username, _ = yield self.controller.config.get_username_by_hostmask(client.server, user)
@@ -147,7 +145,7 @@ class HighlightPlugin(object):
                 highlight,
                 json.dumps(highlight_usernames),
             )
-            client.msg(nickname, 'Added highlight trigger.')
+            client.msg(user, 'Added highlight trigger.')
         else:
-            client.msg(nickname, 'You\'re already subscribed to that trigger.')
+            client.msg(user, 'You\'re already subscribed to that trigger.')
         defer.returnValue(STOP)
