@@ -1,5 +1,6 @@
 import cgi
 from automatron.core.event import STOP
+from automatron.core.util import parse_user
 
 try:
     import ujson as json
@@ -73,7 +74,7 @@ class HighlightPlugin(object):
             return
 
         timestamp = datetime.datetime.now().strftime('%H:%M')
-        nickname = client.parse_user(user)[0]
+        nickname = parse_user(user)[0]
         for username, matches in events.items():
             # Compress overlapping regions if multiple triggers match this message
             matches = sorted(matches, key=lambda m: m[0])
