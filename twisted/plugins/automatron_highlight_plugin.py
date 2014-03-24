@@ -1,4 +1,6 @@
 import cgi
+from automatron.core.event import STOP
+
 try:
     import ujson as json
 except ImportError:
@@ -7,7 +9,7 @@ import datetime
 from twisted.internet import defer
 from zope.interface import implements, classProvides
 from automatron.controller.command import IAutomatronCommandHandler
-from automatron.controller.plugin import IAutomatronPluginFactory, STOP
+from automatron.controller.plugin import IAutomatronPluginFactory
 from automatron.controller.client import IAutomatronMessageHandler
 import re
 from automatron_notify import IAutomatronNotifyHandler
