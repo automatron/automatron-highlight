@@ -6,9 +6,9 @@ except ImportError:
 import datetime
 from twisted.internet import defer
 from zope.interface import implements, classProvides
-from automatron.command import IAutomatronCommandHandler
-from automatron.plugin import IAutomatronPluginFactory, STOP
-from automatron.client import IAutomatronMessageHandler
+from automatron.controller.command import IAutomatronCommandHandler
+from automatron.controller.plugin import IAutomatronPluginFactory, STOP
+from automatron.controller.client import IAutomatronMessageHandler
 import re
 from automatron_notify import IAutomatronNotifyHandler
 
