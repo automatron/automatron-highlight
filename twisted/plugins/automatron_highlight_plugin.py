@@ -1,4 +1,5 @@
 import cgi
+from automatron.controller.controller import IAutomatronClientActions
 from automatron.core.event import STOP
 from automatron.core.util import parse_user
 
@@ -25,6 +26,14 @@ class HighlightPlugin(object):
 
     def __init__(self, controller):
         self.controller = controller
+
+    def _msg(self, server, user, message):
+        self.controller.plugins.emit(
+            IAutomatronClientActions['message'],
+            server,
+            user,
+            message
+        )
 
     def on_message(self, client, user, channel, message):
         if not message:
@@ -114,15 +123,15 @@ class HighlightPlugin(object):
     @defer.inlineCallbacks
     def _on_command(self, client, user, args):
         if len(args) != 2:
-            yield client.msg(user, 'Syntax: highlight <channel> <highlight>')
-            yield client.msg(user, 'If highlight starts with a ~ it will be interpreted as a regular '
+            self._msg(client.server, user, 'Syntax: highlight <channel> <highlight>')
+            self._msg(client.server, user, 'If highlight starts with a ~ it will be interpreted as a regular '
                                    'expression.')
             defer.returnValue(STOP)
 
         channel, highlight = args
 
         if not (yield self.controller.config.has_permission(client.server, channel, user, 'highlight')):
-            client.msg(user, 'You\'re not authorized to set up highlights.')
+            self._msg(client.server, user, 'You\'re not authorized to set up highlights.')
             defer.returnValue(STOP)
 
         username, _ = yield self.controller.config.get_username_by_hostmask(client.server, user)
@@ -148,7 +157,7 @@ class HighlightPlugin(object):
                 highlight,
                 json.dumps(highlight_usernames),
             )
-            client.msg(user, 'Added highlight trigger.')
+            self._msg(client.server, user, 'Added highlight trigger.')
         else:
-            client.msg(user, 'You\'re already subscribed to that trigger.')
+            self._msg(client.server, user, 'You\'re already subscribed to that trigger.')
         defer.returnValue(STOP)
