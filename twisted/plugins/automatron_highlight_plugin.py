@@ -35,17 +35,17 @@ class HighlightPlugin(object):
             message
         )
 
-    def on_message(self, client, user, channel, message):
+    def on_message(self, server, user, channel, message):
         if not message:
             return
-        self._on_message(client, user, channel, message)
+        self._on_message(server, user, channel, message)
 
     @defer.inlineCallbacks
-    def _on_message(self, client, user, channel, message):
-        config = yield self.controller.config.get_plugin_section(self, client.server, channel)
+    def _on_message(self, server, user, channel, message):
+        config = yield self.controller.config.get_plugin_section(self, server['server'], channel)
         events = {}
 
-        own_username, _ = yield self.controller.config.get_username_by_hostmask(client.server, user)
+        own_username, _ = yield self.controller.config.get_username_by_hostmask(server['server'], user)
 
         for highlight, highlight_usernames in config.items():
             matches = []
@@ -107,38 +107,38 @@ class HighlightPlugin(object):
 
             self.controller.plugins.emit(
                 IAutomatronNotifyHandler['on_notify'],
-                client.server,
+                server['server'],
                 username,
-                'Highlight in %s on %s' % (channel, client.server),
+                'Highlight in %s on %s' % (channel, server['server']),
                 '%s <%s> %s' % (timestamp, nickname, message),
                 '%s <b>&lt;%s&gt;</b> %s' % (timestamp, cgi.escape(nickname), message_html),
             )
 
-    def on_command(self, client, user, command, args):
+    def on_command(self, server, user, command, args):
         if command != 'highlight':
             return
 
-        return self._on_command(client, user, args)
+        return self._on_command(server, user, args)
 
     @defer.inlineCallbacks
-    def _on_command(self, client, user, args):
+    def _on_command(self, server, user, args):
         if len(args) != 2:
-            self._msg(client.server, user, 'Syntax: highlight <channel> <highlight>')
-            self._msg(client.server, user, 'If highlight starts with a ~ it will be interpreted as a regular '
+            self._msg(server['server'], user, 'Syntax: highlight <channel> <highlight>')
+            self._msg(server['server'], user, 'If highlight starts with a ~ it will be interpreted as a regular '
                                    'expression.')
             defer.returnValue(STOP)
 
         channel, highlight = args
 
-        if not (yield self.controller.config.has_permission(client.server, channel, user, 'highlight')):
-            self._msg(client.server, user, 'You\'re not authorized to set up highlights.')
+        if not (yield self.controller.config.has_permission(server['server'], channel, user, 'highlight')):
+            self._msg(server['server'], user, 'You\'re not authorized to set up highlights.')
             defer.returnValue(STOP)
 
-        username, _ = yield self.controller.config.get_username_by_hostmask(client.server, user)
+        username, _ = yield self.controller.config.get_username_by_hostmask(server['server'], user)
 
         highlight_usernames, _ = yield self.controller.config.get_plugin_value(
             self,
-            client.server,
+            server['server'],
             channel,
             highlight
         )
@@ -152,12 +152,12 @@ class HighlightPlugin(object):
             highlight_usernames.append(username)
             self.controller.config.update_plugin_value(
                 self,
-                client.server,
+                server['server'],
                 channel,
                 highlight,
                 json.dumps(highlight_usernames),
             )
-            self._msg(client.server, user, 'Added highlight trigger.')
+            self._msg(server['server'], user, 'Added highlight trigger.')
         else:
-            self._msg(client.server, user, 'You\'re already subscribed to that trigger.')
+            self._msg(server['server'], user, 'You\'re already subscribed to that trigger.')
         defer.returnValue(STOP)
